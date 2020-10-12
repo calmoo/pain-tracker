@@ -6,5 +6,7 @@ setup(
     package_dir={"": "src"},
     install_requires=[
         "Flask==1.1.2",
+        "pymongo==3.11.0",
+        "pymodm==0.4.3",
     ],
 )

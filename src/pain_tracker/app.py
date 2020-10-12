@@ -1,22 +1,28 @@
 from flask import Flask, Response, request
-from pymongo_inmemory import MongoClient
-from bson.json_util import dumps
+from pain_tracker.models import User, Entry
+from bson import json_util
 import json
-client = MongoClient()
 app = Flask(__name__)
+app.config["JWT_SECRET_KEY"] = os.environ["JWT_SECRET_KEY"]
 
+jwt = JWTManager(app)
 
 @app.route("/entry", methods=["POST"])
 def post_entry():
     payload = request.json
-    breakpoint()
-    db = client['testdb']
-    collection = db['test-collection']
-    collection.insert_one(payload)
-    client.close()
+    entry = Entry(date=payload['date'],
+                  pain_level_morning=payload['pain_level_morning'],
+                  pain_level_prev_day=payload['pain_level_prev_day'],
+                  sedentary_prev_day=payload['sedentary_prev_day'],
+                  notes_on_prev_day=payload['notes_on_prev_day'],
+                  author=payload['author']
+                  )
+    entry.save()
+
     return Response(
-        response=dumps(payload),
+        response=json.dumps(payload),
         mimetype="application/json",
+        status=201,
     )
 
 
