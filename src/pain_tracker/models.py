@@ -5,6 +5,7 @@ from argon2.exceptions import VerifyMismatchError
 connect('mongodb://localhost:27017/app')
 ph = PasswordHasher()
 
+
 class User(MongoModel):
     email = fields.EmailField(primary_key=True, required=True)
     hashed_password = fields.CharField(required=True)
@@ -29,7 +30,8 @@ class Entry(MongoModel):
     pain_level_prev_day = fields.IntegerField(required=True)
     sedentary_prev_day = fields.BooleanField(required=True)
     notes_on_prev_day = fields.CharField(required=True)
-    author = fields.ReferenceField(User, required=True)
+    user = fields.EmailField(required=True)
+
 
     class Meta:
         collection_name = "entries"

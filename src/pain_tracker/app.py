@@ -11,6 +11,8 @@ from flask_jwt_extended import (
 import json
 import os
 import datetime
+from bson import Binary, Code
+from bson.json_util import dumps
 
 
 app = Flask(__name__)
@@ -18,20 +20,37 @@ app.config["JWT_SECRET_KEY"] = os.environ["JWT_SECRET_KEY"]
 
 jwt = JWTManager(app)
 
+
 @app.route("/entry", methods=["POST"])
+@jwt_required
 def post_entry() -> Response:
+    user = get_jwt_identity()
+
     payload = request.json
     entry = Entry(date=payload['date'],
                   pain_level_morning=payload['pain_level_morning'],
                   pain_level_prev_day=payload['pain_level_prev_day'],
                   sedentary_prev_day=payload['sedentary_prev_day'],
                   notes_on_prev_day=payload['notes_on_prev_day'],
-                  author=payload['author']
+                  user=user
                   )
     entry.save()
-
     return Response(
         response=json.dumps(payload),
+        mimetype="application/json",
+        status=201,
+    )
+
+@app.route("/entry", methods=["GET"])
+@jwt_required
+def get_entries() -> Response:
+    user = get_jwt_identity()
+    entry_list = []
+    for entry in Entry.objects.raw({'user': user}):
+        entry_list.append(entry.to_son().to_dict())
+    breakpoint()
+    return Response(
+        response=dumps(entry_list),
         mimetype="application/json",
         status=201,
     )
